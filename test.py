@@ -17,21 +17,32 @@ from lib.utils import as_numpy, mark_volatile
 import lib.utils.data as torchdata
 import cv2
 
+from lib.utils.kitti_converter import convert_labels_to_kitti
+
 
 def visualize_result(data, preds, args):
     colors = loadmat('data/color150.mat')['colors']
     (img, info) = data
 
     # prediction
-    pred_color = colorEncode(preds, colors)
+    # pred_color = colorEncode(preds, colors)
+    kitti_pred, pred_color = convert_labels_to_kitti(preds)
 
     # aggregate images and save
-    im_vis = np.concatenate((img, pred_color),
-                            axis=1).astype(np.uint8)
+    im_vis = pred_color.astype(np.uint8)
 
     img_name = info.split('/')[-1]
-    cv2.imwrite(os.path.join(args.result,
-                img_name.replace('.jpg', '.png')), im_vis)
+    img_name = ''.join(img_name.split('.')[:-1]) + '_rgb.png'
+    cv2.imwrite(os.path.join('segmentation', args.result,
+                img_name), im_vis)
+
+    # aggregate images and save
+    im_vis = kitti_pred.astype(np.uint8)
+
+    img_name = info.split('/')[-1]
+    img_name = ''.join(img_name.split('.')[:-1]) + '.png'
+    cv2.imwrite(os.path.join('segmentation', args.result,
+                img_name), im_vis)
 
 
 def test(segmentation_module, loader, args):
@@ -92,7 +103,10 @@ def main(args):
     segmentation_module = SegmentationModule(net_encoder, net_decoder, crit)
 
     # Dataset and Loader
-    list_test = [{'fpath_img': args.test_img}]
+    # list_test = [{'fpath_img': args.test_img}]
+    list_test = [{'fpath_img': os.path.join(args.test_img, f)} for f in os.listdir(args.test_img)]
+    # list_test = [{'fpath_img': args.test_img + '000000_10.png'}]
+
     dataset_val = TestDataset(
         list_test, args, max_sample=args.num_val)
     loader_val = torchdata.DataLoader(
@@ -156,7 +170,7 @@ if __name__ == '__main__':
                         help='gpu_id for evaluation')
 
     args = parser.parse_args()
-    print(args)
+    # print(args)
 
     # absolute paths of model weights
     args.weights_encoder = os.path.join(args.model_path,
