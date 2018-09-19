@@ -11,38 +11,15 @@ from scipy.io import loadmat
 # Our libs
 from dataset import TestDataset
 from models import ModelBuilder, SegmentationModule
-from utils import colorEncode
 from lib.nn import user_scattered_collate, async_copy_to
 from lib.utils import as_numpy, mark_volatile
 import lib.utils.data as torchdata
-import cv2
 
-from lib.utils.kitti_converter import convert_labels_to_kitti
+from visualization.kitti_visualizer import visualize_result
 
-
-def visualize_result(data, preds, args):
-    colors = loadmat('data/color150.mat')['colors']
-    (img, info) = data
-
-    # prediction
-    # pred_color = colorEncode(preds, colors)
-    kitti_pred, pred_color = convert_labels_to_kitti(preds)
-
-    # aggregate images and save
-    im_vis = pred_color.astype(np.uint8)
-
-    img_name = info.split('/')[-1]
-    img_name = ''.join(img_name.split('.')[:-1]) + '_rgb.png'
-    cv2.imwrite(os.path.join('segmentation', args.result,
-                img_name), im_vis)
-
-    # aggregate images and save
-    im_vis = kitti_pred.astype(np.uint8)
-
-    img_name = info.split('/')[-1]
-    img_name = ''.join(img_name.split('.')[:-1]) + '.png'
-    cv2.imwrite(os.path.join('segmentation', args.result,
-                img_name), im_vis)
+def create_prediction_folder(folder_name):
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
 
 
 def test(segmentation_module, loader, args):
@@ -103,9 +80,9 @@ def main(args):
     segmentation_module = SegmentationModule(net_encoder, net_decoder, crit)
 
     # Dataset and Loader
-    # list_test = [{'fpath_img': args.test_img}]
+    # NOTE load all image in the path given
     list_test = [{'fpath_img': os.path.join(args.test_img, f)} for f in os.listdir(args.test_img)]
-    # list_test = [{'fpath_img': args.test_img + '000000_10.png'}]
+    create_prediction_folder(args.output_path)
 
     dataset_val = TestDataset(
         list_test, args, max_sample=args.num_val)
@@ -132,6 +109,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # Path related arguments
     parser.add_argument('--test_img', required=True)
+    parser.add_argument('--output_path', required=True)
     parser.add_argument('--model_path', required=True,
                         help='folder to model path')
     parser.add_argument('--suffix', default='_epoch_20.pth',
@@ -164,8 +142,6 @@ if __name__ == '__main__':
                         help='downsampling rate of the segmentation label')
 
     # Misc arguments
-    parser.add_argument('--result', default='.',
-                        help='folder to output visualization results')
     parser.add_argument('--gpu_id', default=0, type=int,
                         help='gpu_id for evaluation')
 
@@ -180,8 +156,5 @@ if __name__ == '__main__':
 
     assert os.path.exists(args.weights_encoder) and \
         os.path.exists(args.weights_encoder), 'checkpoint does not exitst!'
-
-    if not os.path.isdir(args.result):
-        os.makedirs(args.result)
 
     main(args)
