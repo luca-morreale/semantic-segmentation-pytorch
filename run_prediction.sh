@@ -1,4 +1,5 @@
-TEST_IMG=/your/path/to/folder/containing/images/
+TEST_PATH=/your/path/to/folder/containing/images/
+OUTPUT_PATH=/your/path/to/folder/for/preductions/
 MODEL_PATH=baseline-resnet50_dilated8-ppm_bilinear_deepsup
 RESULT_PATH=./
 
@@ -14,14 +15,14 @@ fi
 if [ ! -e $DECODER ]; then
   wget -P $MODEL_PATH http://sceneparsing.csail.mit.edu/model/pytorch/$DECODER
 fi
-if [ ! -e $TEST_IMG ]; then
-  wget -P $RESULT_PATH http://sceneparsing.csail.mit.edu//data/ADEChallengeData2016/images/validation/$TEST_IMG
+if [ ! -e $TEST_PATH ]; then
+  wget -P $RESULT_PATH http://sceneparsing.csail.mit.edu//data/ADEChallengeData2016/images/validation/$TEST_PATH
 fi
 
 python -u test.py \
   --model_path $MODEL_PATH \
-  --test_img $TEST_IMG \
+  --output_path $OUTPUT_PATH \
+  --test_img $TEST_PATH \
   --arch_encoder resnet50_dilated8 \
   --arch_decoder ppm_bilinear_deepsup \
-  --fc_dim 2048 \
-  --result $RESULT_PATH
+  --fc_dim 2048
