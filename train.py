@@ -11,7 +11,7 @@ import torch.nn as nn
 # Our libs
 from dataset import TrainDataset
 from models import ModelBuilder, SegmentationModule
-from utils import AverageMeter
+from lib.utils.utils import AverageMeter
 from lib.nn import UserScatteredDataParallel, user_scattered_collate, patch_replication_callback
 import lib.utils.data as torchdata
 
@@ -81,7 +81,7 @@ def checkpoint(nets, history, args, epoch_num):
 
     # dict_encoder_save = {k: v for k, v in dict_encoder.items() if not (k.endswith('_tmp_running_mean') or k.endswith('tmp_running_var'))}
     # dict_decoder_save = {k: v for k, v in dict_decoder.items() if not (k.endswith('_tmp_running_mean') or k.endswith('tmp_running_var'))}
-    
+
     torch.save(history,
                '{}/history_{}'.format(args.ckpt, suffix_latest))
     torch.save(dict_encoder,
