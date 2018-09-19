@@ -150,7 +150,7 @@ REGEX = [
 
 
 def parse_devices(input_devices):
-    
+
     """Parse user's devices input str to standard format.
     e.g. [gpu0, gpu1, ...]
 
