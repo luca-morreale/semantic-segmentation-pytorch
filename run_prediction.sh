@@ -1,4 +1,4 @@
-TEST_IMG=ADE_val_00001519.jpg
+TEST_IMG=/your/path/to/folder/containing/images/
 MODEL_PATH=baseline-resnet50_dilated8-ppm_bilinear_deepsup
 RESULT_PATH=./
 
@@ -18,7 +18,7 @@ if [ ! -e $TEST_IMG ]; then
   wget -P $RESULT_PATH http://sceneparsing.csail.mit.edu//data/ADEChallengeData2016/images/validation/$TEST_IMG
 fi
 
-python3 -u test.py \
+python -u test.py \
   --model_path $MODEL_PATH \
   --test_img $TEST_IMG \
   --arch_encoder resnet50_dilated8 \
