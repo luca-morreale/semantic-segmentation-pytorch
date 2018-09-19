@@ -6,7 +6,7 @@ RESULT_PATH=./
 ENCODER=$MODEL_PATH/encoder_epoch_20.pth
 DECODER=$MODEL_PATH/decoder_epoch_20.pth
 
-if [ ! -e $ENCODER ]; then
+if [ ! -e $MODEL_PATH ]; then
   mkdir $MODEL_PATH
 fi
 if [ ! -e $ENCODER ]; then
